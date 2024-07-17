@@ -1,0 +1,1 @@
+Automation/build.bat generate
