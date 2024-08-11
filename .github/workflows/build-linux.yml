@@ -24,7 +24,7 @@ jobs:
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -v --target ${{env.TARGET}}
 
     - name: Archive Build Directory
-      run: Compress-Archive -Path build/bin/* -DestinationPath ${{env.TARGET}}-${{env.BUILD_TYPE}}.zip
+      run: zip -r ${{env.TARGET}}-${{env.BUILD_TYPE}}.zip ${{github.workspace}}/build
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4
