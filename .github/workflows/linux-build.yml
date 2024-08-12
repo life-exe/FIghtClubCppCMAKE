@@ -22,3 +22,12 @@ jobs:
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -v --target ${{env.TARGET}}
+
+    - name: Archive Artifacts
+      run: zip -r ${{env.TARGET}}-${{env.BUILD_TYPE}}.zip build/bin
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{env.TARGET}}-${{env.BUILD_TYPE}}
+        path: ${{env.TARGET}}-${{env.BUILD_TYPE}}.zip
