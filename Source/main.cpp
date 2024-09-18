@@ -1,53 +1,134 @@
+#include "Game/Game.h"
 #include "Game/Character.h"
-#include <iostream>
-#include <utility>
-#include <thread>
+#include <string>
+#include <format>
+#include <memory>
+#include "raylib.h"
 
-int main()
+using namespace LifeExe;
+
+enum class Margin
 {
-    #ifdef SKIP_GAME
-        std::cout << "============== No game available ==============" << std::endl;
-        return 0;
-    #endif
-    Character hero1("Durden");
-    Character hero2("Angel Face");
+    Left,
+    Right
+};
 
-    Character* attacker = &hero1;
-    Character* defender = &hero2;
+struct HeroInfoPosition
+{
+    const int x;
+    const int y;
+    const int healthTextOffset;
+    const int healthBarOffset;
+    const Margin margin;
+};
 
-    int roundNum = 1;
-    bool lastFireStatus = true;
+class HeroInfoDrawer
+{
+public:
+    HeroInfoDrawer(const HeroInfoPosition& position) : m_position(position) {}
 
-    while (true)
+    void draw(std::shared_ptr<Character> hero, int screenWidth) const
     {
-        std::cout << "============== Round " << roundNum++ << " ==============" << std::endl;
+        const int x = calculateXPosition(hero->name(), screenWidth);
+        const std::string health = std::format("{}", hero->health());
 
-        const bool fired = attacker->attack(*defender);
-        if (lastFireStatus == fired && !fired)
-        {
-            std::cout << std::endl;
-            std::cout << "============== GAME OVER ==============" << std::endl;
-            std::cout << "Friendship wins!" << std::endl;
-            break;
-        }
-        lastFireStatus = fired;
-
-        if (defender->dead())
-        {
-            std::cout << std::endl;
-            std::cout << "============== GAME OVER ==============" << std::endl;
-            std::cout << defender->name() << " is dead =(" << std::endl;
-            std::cout << attacker->name() << " wins !!!" << std::endl;
-            break;
-        }
-
-        std::swap(attacker, defender);
-        std::cout << std::endl;
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        DrawText(hero->name(), x, m_position.y, c_nameFontData.size, c_nameFontData.color);
+        DrawText(health.c_str(), x, m_position.y + m_position.healthTextOffset, c_healhTextFontData.size, c_healhTextFontData.color);
+        DrawRectangle(x, m_position.y + m_position.healthBarOffset, c_healthBarSize.width * hero->healthPercent(), c_healthBarSize.height,
+            c_healhBarColor);
     }
 
-    std::cin.get();
+private:
+    struct FontData
+    {
+        const int size;
+        const Color color;
+    };
 
-    return 0;
+    struct HealthBarSize
+    {
+        const int width;
+        const int height;
+    };
+
+    const HeroInfoPosition m_position;
+    const FontData c_nameFontData{20, MAROON};
+    const FontData c_healhTextFontData{60, LIGHTGRAY};
+    const Color c_healhBarColor{GREEN};
+    HealthBarSize c_healthBarSize{150, 20};
+
+    int calculateXPosition(const char* name, int screenWidth) const
+    {
+        const int textWidth = MeasureText(name, c_nameFontData.size);
+        if (m_position.margin == Margin::Right)
+        {
+            return screenWidth - m_position.x - textWidth;
+        }
+        return m_position.x;
+    }
+};
+
+int main(void)
+{
+    const int screenWidth = 800;
+    const int screenHeight = 450;
+
+    InitWindow(screenWidth, screenHeight, "Fight Club Game");
+    SetTargetFPS(60);
+
+    std::unique_ptr<Game> fightClubGame = std::make_unique<Game>();
+
+    double startTime = GetTime();
+
+    const HeroInfoDrawer hero1Drawer(HeroInfoPosition{90, 175, 25, 85, Margin::Left});
+    const HeroInfoDrawer hero2Drawer(HeroInfoPosition{90, 175, 25, 85, Margin::Right});
+
+    while (!WindowShouldClose())
+    {
+        BeginDrawing();
+        ClearBackground(DARKBLUE);
+
+        const std::string roundMsg = std::format("Round {}\n\n", fightClubGame->round());
+        DrawText(roundMsg.c_str(), 10, 10, 20, LIGHTGRAY);
+
+        {
+            const int fontSize = 20;
+            const std::string attackMsg =
+                std::format("{} attacks {}\n\n", fightClubGame->attacker()->name(), fightClubGame->defender()->name());
+            const int textWidth = MeasureText(attackMsg.c_str(), fontSize);
+
+            DrawText(attackMsg.c_str(), (screenWidth - textWidth) / 2, 100, fontSize, LIGHTGRAY);
+        }
+
+        hero1Drawer.draw(fightClubGame->hero1(), screenWidth);
+        hero2Drawer.draw(fightClubGame->hero2(), screenWidth);
+
+        EndDrawing();
+
+        if (fightClubGame->running())
+        {
+            if (GetTime() - startTime > 1.0)
+            {
+                startTime = GetTime();
+                fightClubGame->update();
+            }
+        }
+        else
+        {
+            const int fontSize = 20;
+            const auto gameOver = fightClubGame->gamestate() == GameState::GameOver;
+            const std::string gameOverMsg =
+                gameOver ? std::format("GAME OVER, {} wins\n\n", fightClubGame->attacker()->name()) : "Friendship wins!";
+
+            const int textWidth = MeasureText(gameOverMsg.c_str(), fontSize);
+            DrawText(gameOverMsg.c_str(), (screenWidth - textWidth) / 2, 350, fontSize, PINK);
+        }
+
+        if (IsKeyDown(KEY_ENTER))
+        {
+            fightClubGame.reset(new Game());
+        }
+    }
+
+    return EXIT_SUCCESS;
 }

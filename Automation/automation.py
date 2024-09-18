@@ -54,7 +54,7 @@ def get_cmake_command(action):
     }
 
     if action == Action.GENERATE:
-        return f'cmake .. {cmake_flags["generator"]} {cmake_flags["platform"]} {cmake_flags["fresh"]}'
+        return f'cmake .. {cmake_flags["generator"]} {cmake_flags["platform"]} {cmake_flags["fresh"]} -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake'
     elif action in (Action.BUILD_DEBUG, Action.BUILD_RELEASE):
         configuration = (
             Configuration.Debug
@@ -145,7 +145,12 @@ if __name__ == "__main__":
 
     selected_action = args.action
 
+    if selected_action != Action.CLEAN:
+        run_command("conan install . -r conancenter --profile=conanprofile.txt --install-folder=build --output-folder=build --build=missing")
+
     if selected_action in actions:
         actions[selected_action]()
     else:
         print(f"Action '{selected_action}' is not implemented.")
+
+

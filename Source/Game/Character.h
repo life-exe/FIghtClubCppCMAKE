@@ -1,17 +1,10 @@
 #pragma once
 
-#if defined(WIN32) || defined(_WINDOWS)
-    #ifdef _EXPORTING
-        #define GAME_API __declspec(dllexport)
-    #elif _IMPORTING
-        #define GAME_API __declspec(dllimport)
-    #else
-        #define GAME_API
-    #endif
-#else
-    #define GAME_API __attribute__ ((visibility ("default")))
-#endif
+#include "API.h"
+#include <memory>
 
+namespace LifeExe
+{
 class Weapon;
 
 class GAME_API Character
@@ -22,11 +15,16 @@ public:
 
     const char* name() const;
     bool dead() const;
+    int health() const;
+    float healthPercent() const;
     bool attack(Character& target);
     void takeDamage(int damage);
 
 private:
     const char* m_name;
     Weapon* m_weapon;
-    int m_health{100};
+
+    const int c_maxHealth{100};
+    int m_health{c_maxHealth};
 };
+}  // namespace LifeExe

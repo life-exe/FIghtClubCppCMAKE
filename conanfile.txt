@@ -1,0 +1,10 @@
+[requires]
+raylib/5.0
+gtest/1.15.0
+cpr/1.10.5
+nlohmann_json/3.11.3
+flecs/4.0.0
+
+[generators]
+CMakeDeps
+CMakeToolchain

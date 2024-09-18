@@ -1,22 +1,28 @@
-#include <cassert>
+#include <gtest/gtest.h>
 #include "Utils/Math.h"
 #include "Game/Character.h"
 
-int main()
+using namespace LifeExe;
+TEST(Math, MaxShouldBeCalculatedCorrected)
 {
-    using namespace LifeExe;
+    ASSERT_TRUE(max(3, 0) == 3);
+    ASSERT_TRUE(max(-3, 0) == 0);
+}
 
-    assert(max(3, 0) == 3);
-    assert(max(-3, 0) == 0);
-
+TEST(Character, CharacterShouldTakeDamage)
+{
     Character hero("Pacman");
-    assert(!hero.dead());
+    ASSERT_TRUE(!hero.dead());
 
     hero.takeDamage(10);
-    assert(!hero.dead());
+    ASSERT_TRUE(hero.health() == 90);
+}
+
+TEST(Character, CharacterCanBeKilled)
+{
+    Character hero("Pacman");
+    ASSERT_TRUE(!hero.dead());
 
     hero.takeDamage(10000);
-    assert(hero.dead());
-
-    return 0;
+    ASSERT_TRUE(hero.dead());
 }

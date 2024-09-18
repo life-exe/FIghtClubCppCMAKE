@@ -24,20 +24,29 @@ set(MATH_INCLUDES Source/Utils/Math.h)
 
 set(DLL_GAME_SOURCES 
     Source/Game/Weapon.cpp 
-    Source/Game/Character.cpp)
+    Source/Game/Character.cpp
+    Source/Game/Game.cpp)
 
 set(DLL_GAME_INCLUDES 
     Source/Game/Weapon.h 
-    Source/Game/Character.h)
+    Source/Game/Character.h
+    Source/Game/Game.h
+    Source/Game/API.h)
 
-source_group("Source files/Game" FILES "Source/Game/Weapon.cpp" "Source/Game/Character.cpp")
-source_group("Header files/Game" FILES "Source/Game/Weapon.h" "Source/Game/Character.h")
+#find libs
+find_package(raylib REQUIRED)
+find_package(gtest REQUIRED)
+find_package(cpr REQUIRED)
+find_package(nlohmann_json REQUIRED)
+find_package(flecs REQUIRED)
 
 # targets
 add_executable(${PROJECT_NAME} ${SOURCES})
 add_library(MathLib STATIC ${MATH_SOURCES} ${MATH_INCLUDES})
 add_library(${PROJECT_NAME}Lib SHARED ${DLL_GAME_SOURCES} ${DLL_GAME_INCLUDES})
 add_executable(${PROJECT_NAME}TestRunner Source/Tests/main.cpp)
+add_executable(ChuckNorrisJokes Source/ChuckNorrisJokes/main.cpp)
+add_executable(Flecs Source/Flecs/main.cpp)
 
 target_compile_definitions(${PROJECT_NAME}Lib PRIVATE _EXPORTING)
 target_compile_definitions(${PROJECT_NAME} PUBLIC _IMPORTING)
@@ -47,10 +56,21 @@ if(SKIP_GAME_OPT)
     target_compile_definitions(${PROJECT_NAME} PUBLIC SKIP_GAME)
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}Lib)
+#link libs
+target_link_libraries(${PROJECT_NAME} PUBLIC  ${PROJECT_NAME}Lib)
+target_link_libraries(${PROJECT_NAME} PUBLIC raylib)
+target_link_libraries(ChuckNorrisJokes cpr::cpr)
+target_link_libraries(ChuckNorrisJokes nlohmann_json::nlohmann_json)
+target_link_libraries(Flecs flecs::flecs_static)
+
+message(STATUS "Raylib libraries: ${raylib_LIBRARIES}")
+get_target_property(RAYLIB_PATH raylib INTERFACE_INCLUDE_DIRECTORIES)
+message(STATUS "Raylib include directories: ${RAYLIB_PATH}")
+
 target_link_libraries(${PROJECT_NAME}Lib PRIVATE MathLib)
 target_link_libraries(${PROJECT_NAME}TestRunner PRIVATE MathLib)
 target_link_libraries(${PROJECT_NAME}TestRunner PRIVATE ${PROJECT_NAME}Lib)
+target_link_libraries(${PROJECT_NAME}TestRunner PRIVATE gtest::gtest)
 
 # includes
 set(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}TestRunner ${PROJECT_NAME}Lib)
@@ -75,4 +95,3 @@ message("Compiler flags: ${CMAKE_CXX_FLAGS}")
 message("Compiler debug flags: ${CMAKE_CXX_FLAGS_DEBUG}")
 message("Compiler release flags: ${CMAKE_CXX_FLAGS_RELEASE}")
 message("Configuration types: ${CMAKE_CONFIGURATION_TYPES}")
-

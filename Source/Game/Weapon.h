@@ -1,5 +1,7 @@
 #pragma once
 
+namespace LifeExe
+{
 class Weapon
 {
 public:
@@ -10,3 +12,4 @@ public:
 private:
     int m_bullets{23};
 };
+}  // namespace LifeExe

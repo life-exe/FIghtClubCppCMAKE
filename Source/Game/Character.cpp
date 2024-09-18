@@ -1,7 +1,8 @@
 #include "Character.h"
 #include "Weapon.h"
 #include "Utils/Math.h"
-#include <iostream>
+
+using namespace LifeExe;
 
 Character::Character(const char* name) : m_name(name)
 {
@@ -25,18 +26,23 @@ bool Character::dead() const
     return m_health == 0;
 }
 
+int Character::health() const
+{
+    return m_health;
+}
+
+float LifeExe::Character::healthPercent() const
+{
+    return static_cast<float>(m_health) / c_maxHealth;
+}
+
 bool Character::attack(Character& target)
 {
     const bool fired = m_weapon->fire();
     if (fired)
     {
         const int damage = m_weapon->damage();
-        std::cout << m_name << " is attacking with damage: " << damage << std::endl;
         target.takeDamage(damage);
-    }
-    else
-    {
-        std::cout << m_name << " has no more bullets. shit... bad day..." << std::endl;
     }
 
     return fired;
@@ -46,6 +52,4 @@ void Character::takeDamage(int damage)
 {
     m_health -= damage;
     if (m_health < 0) m_health = 0;
-
-    std::cout << m_name << " was attacked, current health: " << m_health << std::endl;
 }

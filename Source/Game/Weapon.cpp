@@ -1,6 +1,8 @@
 #include "Weapon.h"
 #include "Utils/Math.h"
 
+using namespace LifeExe;
+
 Weapon::Weapon(int bullets) : m_bullets(bullets) {}
 
 bool Weapon::fire()
