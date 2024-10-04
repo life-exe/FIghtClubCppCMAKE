@@ -6,7 +6,8 @@ message("------------- Project files generation for ${PROJECT_NAME} ------------
 
 # common options
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-message("Output directory: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_SUPPRESS_REGENERATION TRUE)
@@ -15,28 +16,47 @@ set(CMAKE_SUPPRESS_REGENERATION TRUE)
 set(CMAKE_CXX_STANDARD 20)
 # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /FA")
 
-#app options
-set(SOURCES 
-    Source/main.cpp 
-    Source/Utils/Math.cpp 
+# sources
+set(SOURCES Source/main.cpp)
+
+set(MATH_SOURCES Source/Utils/Math.cpp)
+set(MATH_INCLUDES Source/Utils/Math.h)
+
+set(DLL_GAME_SOURCES 
     Source/Game/Weapon.cpp 
     Source/Game/Character.cpp)
 
-set(INCLUDES 
-    Source/Utils/Math.h 
+set(DLL_GAME_INCLUDES 
     Source/Game/Weapon.h 
     Source/Game/Character.h)
-
-source_group("Source files/Utils" FILES "Source/Utils/Math.cpp")
-source_group("Header files/Utils" FILES "Source/Utils/Math.h")
 
 source_group("Source files/Game" FILES "Source/Game/Weapon.cpp" "Source/Game/Character.cpp")
 source_group("Header files/Game" FILES "Source/Game/Weapon.h" "Source/Game/Character.h")
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${INCLUDES})
+# targets
+add_executable(${PROJECT_NAME} ${SOURCES})
+add_library(MathLib STATIC ${MATH_SOURCES} ${MATH_INCLUDES})
+add_library(${PROJECT_NAME}Lib SHARED ${DLL_GAME_SOURCES} ${DLL_GAME_INCLUDES})
+add_executable(${PROJECT_NAME}TestRunner Source/Tests/main.cpp)
+
+target_compile_definitions(${PROJECT_NAME}Lib PRIVATE _EXPORTING)
+target_compile_definitions(${PROJECT_NAME} PUBLIC _IMPORTING)
+
+option(SKIP_GAME_OPT "Skip game" OFF)
+if(SKIP_GAME_OPT)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC SKIP_GAME)
+endif()
+
+target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}Lib)
+target_link_libraries(${PROJECT_NAME}Lib PRIVATE MathLib)
+target_link_libraries(${PROJECT_NAME}TestRunner PRIVATE MathLib)
+target_link_libraries(${PROJECT_NAME}TestRunner PRIVATE ${PROJECT_NAME}Lib)
 
 # includes
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Source)
+set(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}TestRunner ${PROJECT_NAME}Lib)
+foreach(target IN LISTS TARGETS)
+    target_include_directories(${target} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Source)
+endforeach()
 
 if(WIN32)
     message("Running on Windows")

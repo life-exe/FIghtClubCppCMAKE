@@ -5,6 +5,10 @@
 
 int main()
 {
+    #ifdef SKIP_GAME
+        std::cout << "============== No game available ==============" << std::endl;
+        return 0;
+    #endif
     Character hero1("Durden");
     Character hero2("Angel Face");
 
