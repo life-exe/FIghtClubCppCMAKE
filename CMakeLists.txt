@@ -33,11 +33,18 @@ set(DLL_GAME_INCLUDES
 source_group("Source files/Game" FILES "Source/Game/Weapon.cpp" "Source/Game/Character.cpp")
 source_group("Header files/Game" FILES "Source/Game/Weapon.h" "Source/Game/Character.h")
 
+# find libs
+find_package(nlohmann_json REQUIRED)
+find_package(GTest REQUIRED)
+find_package(cpr)
+
 # targets
 add_executable(${PROJECT_NAME} ${SOURCES})
 add_library(MathLib STATIC ${MATH_SOURCES} ${MATH_INCLUDES})
 add_library(${PROJECT_NAME}Lib SHARED ${DLL_GAME_SOURCES} ${DLL_GAME_INCLUDES})
 add_executable(${PROJECT_NAME}TestRunner Source/Tests/main.cpp)
+
+add_executable(ChuckNorrisJokes Source/ChuckNorrisJokes/main.cpp)
 
 target_compile_definitions(${PROJECT_NAME}Lib PRIVATE _EXPORTING)
 target_compile_definitions(${PROJECT_NAME} PUBLIC _IMPORTING)
@@ -47,10 +54,14 @@ if(SKIP_GAME_OPT)
     target_compile_definitions(${PROJECT_NAME} PUBLIC SKIP_GAME)
 endif()
 
+# link libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}Lib)
 target_link_libraries(${PROJECT_NAME}Lib PRIVATE MathLib)
 target_link_libraries(${PROJECT_NAME}TestRunner PRIVATE MathLib)
 target_link_libraries(${PROJECT_NAME}TestRunner PRIVATE ${PROJECT_NAME}Lib)
+target_link_libraries(${PROJECT_NAME}TestRunner PRIVATE gtest::gtest)
+target_link_libraries(ChuckNorrisJokes nlohmann_json::nlohmann_json)
+target_link_libraries(ChuckNorrisJokes cpr::cpr)
 
 # includes
 set(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}TestRunner ${PROJECT_NAME}Lib)
