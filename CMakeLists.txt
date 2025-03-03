@@ -28,6 +28,7 @@ add_subdirectory(Source/RaylibTetris)
 add_subdirectory(Source/ChuckNorrisJokes)
 add_subdirectory(Source/Utils)
 add_subdirectory(Source/FightClubGame)
+add_subdirectory(Source/DoodleJumpGame)
 
 include(${CMAKE_SOURCE_DIR}/Automation/CMAKE/CMakeHelpers.cmake)
 system_info()

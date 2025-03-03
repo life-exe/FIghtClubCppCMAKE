@@ -19,4 +19,5 @@ MATH_API int max(int x, int y);
 MATH_API int factorial(int n);
 MATH_API int sum(int n);
 MATH_API int randomInt(int min, int max);
+MATH_API float randomFloat(float min, float max);
 }  // namespace LifeExe

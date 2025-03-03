@@ -18,3 +18,18 @@ macro(system_info)
     message("Configuration types: ${CMAKE_CONFIGURATION_TYPES}")
     message("===================================================")
 endmacro()
+
+function(setup_precompiled_headers TARGET PCH_SOURCE PCH_HEADER SOURCE_FILES)
+    if(MSVC)
+        target_sources(${TARGET} PRIVATE ${PCH_HEADER} ${PCH_SOURCE})
+        set_source_files_properties(${PCH_SOURCE} PROPERTIES COMPILE_FLAGS "/Yc${PCH_HEADER}")
+
+        foreach(SOURCE_FILE ${SOURCE_FILES})
+            if(${SOURCE_FILE} MATCHES "\\.cpp$")
+                set_source_files_properties(${SOURCE_FILE} PROPERTIES COMPILE_FLAGS "/Yu${PCH_HEADER}")
+            endif()
+        endforeach()
+        target_compile_options(${TARGET} PRIVATE "/FI${PCH_HEADER}")
+    endif()
+endfunction()
+
