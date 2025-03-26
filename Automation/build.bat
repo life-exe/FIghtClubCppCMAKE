@@ -9,8 +9,13 @@ if %errorlevel% NEQ 0 (
 
 REM check args
 if "%~1"=="" (
-    echo "Usage: build.bat clean|generate|build_debug|build_release|clang_format"
+    echo "Usage: build.bat clean|generate|build|clang_format"
     exit /b 1
 )
 
-python Automation/automation.py %~1
+if "%~2"=="" (
+    python Automation/automation.py %~1
+    exit /b 1
+)
+
+python Automation/automation.py %~1 --configuration %~2

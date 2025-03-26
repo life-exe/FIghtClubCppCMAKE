@@ -15,8 +15,7 @@ class Configuration(Enum):
 class Action(Enum):
     CLEAN = "clean"
     GENERATE = "generate"
-    BUILD_DEBUG = "build_debug"
-    BUILD_RELEASE = "build_release"
+    BUILD = "build"
     CLANG_FORMAT = "clang_format"
 
 ##################### manual configuration ####################
@@ -44,7 +43,7 @@ def remove_build_folder():
         print(f"{Config.BUILD_FOLDER} folder does not exist.")
 
 
-def get_cmake_command(action):
+def get_cmake_command(action: Action, configuration: Configuration):
     cmake_flags = {
         "generator": f'-G "{Config.CMAKE_GENERATOR}"',
         "platform": f"-A {Config.PLATFORM.value}",
@@ -55,12 +54,7 @@ def get_cmake_command(action):
 
     if action == Action.GENERATE:
         return f'cmake .. {cmake_flags["generator"]} {cmake_flags["platform"]} {cmake_flags["fresh"]} -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake"'
-    elif action in (Action.BUILD_DEBUG, Action.BUILD_RELEASE):
-        configuration = (
-            Configuration.Debug
-            if action == Action.BUILD_DEBUG
-            else Configuration.Release
-        )
+    elif action == Action.BUILD:
         return f'cmake --build . {cmake_flags["clean_first"]} {cmake_flags["verbose"]} --config {configuration.value}'
     return None
 
@@ -69,14 +63,13 @@ def run_command(command):
     result = subprocess.run(command, shell=True)
     return result.returncode == 0
 
-
-def generate_project_files():
+def generate_project_files(action: Action, configuration: Configuration):
     if not os.path.exists(Config.BUILD_FOLDER):
         os.makedirs(Config.BUILD_FOLDER)
         print(f"Created {Config.BUILD_FOLDER} folder.")
 
     os.chdir(Config.BUILD_FOLDER)
-    command = get_cmake_command(Action.GENERATE)
+    command = get_cmake_command(action, configuration)
     print(f"Generated project files with command: {command}")
 
     if run_command(command):
@@ -86,7 +79,7 @@ def generate_project_files():
     os.chdir("..")
 
 
-def build_project(configuration=Configuration.Release):
+def build_project(action: Action, configuration: Configuration):
     if not os.path.exists(Config.BUILD_FOLDER):
         print(
             f"{Config.BUILD_FOLDER} folder does not exist. Please generate project files first."
@@ -94,11 +87,7 @@ def build_project(configuration=Configuration.Release):
         return
 
     os.chdir(Config.BUILD_FOLDER)
-    command = get_cmake_command(
-        Action.BUILD_DEBUG
-        if configuration == Configuration.Debug
-        else Action.BUILD_RELEASE
-    )
+    command = get_cmake_command(action, configuration)
     if run_command(command):
         print(f"Project built successfully in {configuration} mode.")
     else:
@@ -133,17 +122,19 @@ if __name__ == "__main__":
     parser.add_argument(
         "action", type=Action, choices=list(Action), help="Action to perform"
     )
+    parser.add_argument(
+        "--configuration", type=Configuration, choices=list(Configuration), help="Build configuration"
+    )
     args = parser.parse_args()
-
+    selected_action = args.action
+    selected_configuration = args.configuration
+    
     actions = {
         Action.CLEAN: remove_build_folder,
-        Action.GENERATE: generate_project_files,
-        Action.BUILD_DEBUG: lambda: build_project(Configuration.Debug),
-        Action.BUILD_RELEASE: lambda: build_project(Configuration.Release),
+        Action.GENERATE: lambda: generate_project_files(Action.GENERATE, selected_configuration),
+        Action.BUILD: lambda: build_project(Action.BUILD, selected_configuration),
         Action.CLANG_FORMAT: lambda: run_clang_format(Config.SOURCE_DIR),
     }
-
-    selected_action = args.action
 
     if selected_action in actions:
         actions[selected_action]()
