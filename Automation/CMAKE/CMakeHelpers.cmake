@@ -33,3 +33,31 @@ function(setup_precompiled_headers TARGET PCH_SOURCE PCH_HEADER SOURCE_FILES)
     endif()
 endfunction()
 
+macro(setup_conan)
+    set(CMAKE_CONAN_PATH "${CMAKE_BINARY_DIR}/conan_provider.cmake")
+    if(NOT EXISTS ${CMAKE_CONAN_PATH})
+        message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
+        file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/refs/heads/develop2/conan_provider.cmake" "${CMAKE_CONAN_PATH}")
+    endif()
+
+    set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_CONAN_PATH})
+
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        message(STATUS "Setup release profiles")
+        set(CONAN_HOST_PROFILE "${CMAKE_CURRENT_SOURCE_DIR}/conanProfileRelease")
+        set(CONAN_BUILD_PROFILE "${CMAKE_CURRENT_SOURCE_DIR}/conanProfileRelease")
+    elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        message(STATUS "Setup debug profiles")
+        set(CONAN_HOST_PROFILE "${CMAKE_CURRENT_SOURCE_DIR}/conanProfileDebug")
+        set(CONAN_BUILD_PROFILE "${CMAKE_CURRENT_SOURCE_DIR}/conanProfileDebug")
+    else()
+        message(WARNING "No build type was specified")
+    endif()
+
+
+
+
+
+
+endmacro()
+

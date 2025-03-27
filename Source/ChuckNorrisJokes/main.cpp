@@ -13,7 +13,7 @@
 #endif
 
 #include <nlohmann/json.hpp>
-#include <cpr/cpr.h>
+// #include <cpr/cpr.h>
 #include <iostream>
 #include <string>
 #include <optional>
@@ -62,23 +62,23 @@ struct ChuckResponse
 std::string requestJoke()
 {
     std::string joke{};
-    cpr::Response response = cpr::Get(cpr::Url{CHUCK_URL});
-    std::cout << response.status_code << std::endl;
+    // cpr::Response response = cpr::Get(cpr::Url{CHUCK_URL});
+    // std::cout << response.status_code << std::endl;
 
-    if (response.status_code == httpCodes::HTTP_OK)
-    {
-        std::cout << response.header["content-type"] << std::endl;
-        std::cout << response.text << std::endl;
+    // if (response.status_code == httpCodes::HTTP_OK)
+    // {
+    //     std::cout << response.header["content-type"] << std::endl;
+    //     std::cout << response.text << std::endl;
 
-        if (const auto chuckResponse = parse<ChuckResponse>(response.text))
-        {
-            joke = chuckResponse->value;
-            std::cout << "======================" << std::endl;
-            std::cout << chuckResponse->value << std::endl;
-            std::cout << chuckResponse->id << std::endl;
-            std::cout << chuckResponse->url << std::endl;
-        }
-    }
+    //     if (const auto chuckResponse = parse<ChuckResponse>(response.text))
+    //     {
+    //         joke = chuckResponse->value;
+    //         std::cout << "======================" << std::endl;
+    //         std::cout << chuckResponse->value << std::endl;
+    //         std::cout << chuckResponse->id << std::endl;
+    //         std::cout << chuckResponse->url << std::endl;
+    //     }
+    // }
     return joke;
 }
 

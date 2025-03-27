@@ -53,7 +53,7 @@ def get_cmake_command(action: Action, configuration: Configuration):
     }
 
     if action == Action.GENERATE:
-        return f'cmake .. {cmake_flags["generator"]} {cmake_flags["platform"]} {cmake_flags["fresh"]} -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake"'
+        return f'cmake .. {cmake_flags["generator"]} {cmake_flags["platform"]} {cmake_flags["fresh"]} -DCMAKE_BUILD_TYPE={configuration.value}'
     elif action == Action.BUILD:
         return f'cmake --build . {cmake_flags["clean_first"]} {cmake_flags["verbose"]} --config {configuration.value}'
     return None

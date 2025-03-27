@@ -1,7 +1,6 @@
 [requires]
 nlohmann_json/3.11.3
 gtest/1.15.0
-cpr/1.10.5
 raylib/5.5
 
 [generators]
