@@ -7,12 +7,16 @@ on:
     branches: ["master"]
 
 env:
-  BUILD_TYPE: Release
   TARGET: FightClubGame
 
 jobs:
   build:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        configuration:
+          - Release
+          - Debug
 
     steps:
       - uses: actions/checkout@v4
@@ -21,16 +25,16 @@ jobs:
         run: pip install conan
 
       - name: Configure CMake
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.configuration}}
 
       - name: Build
-        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -v --target ${{env.TARGET}}
+        run: cmake --build ${{github.workspace}}/build --config ${{matrix.configuration}} -v --target ${{env.TARGET}}
 
       - name: Archive Artifacts
-        run: Compress-Archive -Path build/bin/* -DestinationPath ${{env.TARGET}}-${{env.BUILD_TYPE}}.zip
+        run: Compress-Archive -Path build/bin/* -DestinationPath ${{env.TARGET}}-${{matrix.configuration}}.zip
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{env.TARGET}}-${{env.BUILD_TYPE}}
-          path: ${{env.TARGET}}-${{env.BUILD_TYPE}}.zip
+          name: ${{env.TARGET}}-${{matrix.configuration}}
+          path: ${{env.TARGET}}-${{matrix.configuration}}.zip
