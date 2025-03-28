@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 
+// clang-format off
 #if defined(WIN32) || defined(_WINDOWS)
     #ifdef _EXPORTING
         #define MATH_API __declspec(dllexport)
@@ -12,6 +13,7 @@
 #else
     #define MATH_API __attribute__ ((visibility ("default")))
 #endif
+// clang-format on
 
 namespace LifeExe
 {
