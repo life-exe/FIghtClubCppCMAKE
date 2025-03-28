@@ -1,4 +1,4 @@
-set(PROJECT_NAME DooleJumpGame)
+set(PROJECT_NAME DoodleJumpGame)
 
 add_executable(${PROJECT_NAME} main.cpp)
 

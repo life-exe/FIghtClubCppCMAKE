@@ -7,15 +7,22 @@ class Player
 public:
     struct Config
     {
-        float width{40.0f};
-        float height{40.0f};
-        float velocityX{240.0f};
-        float gravity{400.0f};
-        float jumpVelocityY{-500.0f};
-        float initialOffsetY{50.0f};
+        float width;
+        float height;
+        float velocityX;
+        float gravity;
+        float jumpVelocityY;
+        float initialOffsetY;
+
+        Config()                                   //
+            : width(40.0f), height(40.0f),         //
+              velocityX(240.0f), gravity(400.0f),  //
+              jumpVelocityY(-500.0f), initialOffsetY(50.0f)
+        {
+        }
     };
 
-    Player(const ScreenSize& screenSize, const Config& config = {});
+    Player(const ScreenSize& screenSize, const Config& config = Config());
 
     void update(float deltaTime);
     void moveLeft(float deltaTime);

@@ -7,7 +7,7 @@ on:
     branches: ["master"]
 
 env:
-  TARGET: FightClubGame
+  TARGETS: FightClubGame DoodleJumpGame
 
 jobs:
   build:
@@ -28,13 +28,13 @@ jobs:
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.configuration}}
 
       - name: Build
-        run: cmake --build ${{github.workspace}}/build --config ${{matrix.configuration}} -v --target ${{env.TARGET}}
+        run: cmake --build ${{github.workspace}}/build --config ${{matrix.configuration}} -v --target ${{env.TARGETS}}
 
       - name: Archive Artifacts
-        run: zip -r ${{env.TARGET}}-${{matrix.configuration}}.zip build/bin
+        run: zip -r artifacts-${{matrix.configuration}}.zip build/bin
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{env.TARGET}}-${{matrix.configuration}}
-          path: ${{env.TARGET}}-${{matrix.configuration}}.zip
+          name: artifacts-${{matrix.configuration}}
+          path: artifacts-${{matrix.configuration}}.zip
