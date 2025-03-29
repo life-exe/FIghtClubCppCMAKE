@@ -1,0 +1,53 @@
+name: Linux Test Runner
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+env:
+  CONFIGURATION: Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - DoodleJumpGameTestRunner
+          - FightClubGameTestRunner
+
+    env:
+      TEST_REPORT_PATH: ${{github.workspace}}/build/bin/${{matrix.target}}-report.xml
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Conan
+        run: pip install conan
+
+      - name: Configure CMake
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.CONFIGURATION}}
+
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config ${{env.CONFIGURATION}} -v --target ${{matrix.target}}
+
+      - name: Run tests
+        run: ${{github.workspace}}/build/bin/${{matrix.target}} --gtest_output=xml:"${{env.TEST_REPORT_PATH}}"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: TestResults-${{matrix.target}}
+          path: ${{env.TEST_REPORT_PATH}}
+
+      - name: Publish Test Report
+        uses: phoenix-actions/test-reporting@v10
+        if: always()
+        with:
+          name: Test Results
+          path: ${{env.TEST_REPORT_PATH}}
+          reporter: java-junit
+          output-to: "step-summary"
+          fail-on-error: "true"
